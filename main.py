@@ -1,50 +1,61 @@
-from game import TicTacToe
-from nn import NeuralNetwork
-from threadtest import EvaluatorThread
+from simulator import simulate
+from helpers import generate_nn
+from genetic_operations import crossover
 
-import operator
+from random import randint
+from concurrent.futures import ThreadPoolExecutor
 import time
+import operator
 
-def generate_nn():
-    return NeuralNetwork(18, [
-        #[18, 'sigmoid'],
-        [16, 'sigmoid'],
-        #[14, 'sigmoid'],
-        #[12, 'sigmoid'],
-        #[10, 'sigmoid'],
-        [9, 'sigmoid']
-    ])
+thread_pool_size = 4
+number_of_individuals_in_generation = 20
+number_of_selected_individuals = 4
+number_of_simulations = 1000
+number_of_generations = 10
 
-n = 4
-k = 10000
-nns = {}
-for i in range(n):
-    nns[generate_nn()] = 0
 
-#nn.unbind_neurons(0, 0, 1)
-#nn.unbind_neurons(0, 2, 0)
-#nn.unbind_neurons(1, 1, 0)
+def main():
+    start = time.time()
+    executor = ThreadPoolExecutor(thread_pool_size)
+    nns = {}
+    for i in range(number_of_individuals_in_generation):
+        nns[generate_nn()] = 0
 
-#for i in nn.layers:
-#    print(i)
+    for _ in range(number_of_generations):
+        futures = []
+        for nn in nns:
+            futures.append(executor.submit(simulate, nn, number_of_simulations))
 
-def test():
-    threads = []
-    for nn in nns:
-        th = EvaluatorThread(nn, k)
-        threads.append(th)
-        th.start()
+        for nn, future in zip(nns, futures):
+            score = future.result()
+            nns[nn] = score
+            #nn.save(str(score) + '_' + str(time.time()))
 
-    for th in threads:
-        th.join()
-        nns[th.nn] = th.score
-        print('stopped simulation')
+        sorted_nns = sorted(nns.items(), key=operator.itemgetter(1), reverse=True)
+        wins = [x[1] for x in sorted_nns]
+        medium_win_rate = sum(wins) / len(wins) / number_of_simulations * 100
+        print(wins, str(medium_win_rate) + '%')
 
-    sorted_nns = sorted(nns.items(), key=operator.itemgetter(1))
-    print(sorted_nns)
+        selected = []
+        for nn, _ in sorted_nns:
+            selected.append(nn)
+            if len(selected) == number_of_selected_individuals:
+                break
 
-start = time.time()
-test()
-stop = time.time()
+        next_generation = []
+        for _ in range(number_of_individuals_in_generation):
+            n1 = selected[randint(0, len(selected) - 1)]
+            n2 = selected[randint(0, len(selected) - 1)]
+            child = crossover(n1, n2)
+            next_generation.append(child)
 
-print(stop - start)
+        nns.clear()
+        for nn in next_generation:
+            nns[nn] = 0
+
+    stop = time.time()
+    print(stop - start)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,4 +1,7 @@
 from game import TicTacToe
+from nn import NeuralNetwork
+
+from random import randint
 
 
 def board_to_neuron_inputs(board):
@@ -15,3 +18,17 @@ def board_to_neuron_inputs(board):
             xs.append(0)
             os.append(0)
     return xs + os
+
+
+def choose(a, b):
+    if randint(0, 1) == 0:
+        return a
+    else:
+        return b
+
+
+def generate_nn():
+    return NeuralNetwork(18, [
+        [16, 'sigmoid'],
+        [9, 'sigmoid']
+    ])

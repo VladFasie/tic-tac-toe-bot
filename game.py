@@ -14,7 +14,7 @@ class TicTacToe:
     def is_done(self):
         return self.round == 9 or self.winner != TicTacToe.Empty
 
-    def disponible_moves(self):
+    def available_moves(self):
         return [i for i, val in enumerate(self.board) if val == TicTacToe.Empty]
 
     def move(self, pos):
@@ -30,9 +30,9 @@ class TicTacToe:
         else:
             raise Exception('wrong next player {}'.format(self.next))
         self.round += 1
-        self.check_wineerr()
+        self.check_winner()
 
-    def check_wineerr(self):
+    def check_winner(self):
         if self.round < 5:
             return
         # rows check
