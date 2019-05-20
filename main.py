@@ -21,7 +21,7 @@ def main():
     for i in range(number_of_individuals_in_generation):
         nns[generate_nn()] = 0
 
-    for _ in range(number_of_generations):
+    for generation in range(number_of_generations):
         futures = []
         for nn in nns:
             futures.append(executor.submit(simulate, nn, number_of_simulations))
@@ -34,7 +34,11 @@ def main():
         sorted_nns = sorted(nns.items(), key=operator.itemgetter(1), reverse=True)
         wins = [x[1] for x in sorted_nns]
         medium_win_rate = sum(wins) / len(wins) / number_of_simulations * 100
-        print(wins, str(medium_win_rate) + '%')
+        print(str(generation) + ') ', wins, str(medium_win_rate) + '%')
+
+        if generation == number_of_generations - 1:
+            sorted_nns[0][0].save('bot.nn')
+            break
 
         selected = []
         for nn, _ in sorted_nns:

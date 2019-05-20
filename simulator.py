@@ -1,8 +1,7 @@
 from game import TicTacToe
-from helpers import board_to_neuron_inputs
+from helpers import get_best_legal_move
 
 from random import randint
-import operator
 
 
 def simulate(nn, iterations):
@@ -11,16 +10,7 @@ def simulate(nn, iterations):
     for _ in range(iterations):
         try:
             while not game.is_done():
-                data = board_to_neuron_inputs(game.board)
-                result = nn.feed_forward(data)
-                available_moves = game.available_moves()
-                sorted_result = sorted(enumerate(result), key=operator.itemgetter(1), reverse=True)
-                move = None
-                for idx_val in sorted_result:
-                    idx = idx_val[0]
-                    if idx in available_moves:
-                        move = idx
-                        break
+                move = get_best_legal_move(nn, game)
                 game.move(move)
                 if not game.is_done():
                     available_moves = game.available_moves()
