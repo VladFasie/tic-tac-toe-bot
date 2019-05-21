@@ -3,7 +3,7 @@ from helpers import choose
 
 from random import randint
 
-mutation_rate = 2  # %
+mutation_rate = 4  # %
 mutation_range = 15  # %
 
 def crossover(n1: NeuralNetwork, n2: NeuralNetwork) -> NeuralNetwork:

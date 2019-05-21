@@ -8,6 +8,7 @@ from tkinter import filedialog
 
 master = Tk()
 buttons = []
+who_is_first_buttons = []
 replay_btn = None
 
 game = TicTacToe()
@@ -15,6 +16,24 @@ nn = None
 X = PhotoImage(file='X.gif')
 O = PhotoImage(file='O.gif')
 Empty = PhotoImage(file='Empty.png')
+
+
+def who_is_first(val):
+    for b in who_is_first_buttons:
+        b.grid_remove()
+    who_is_first_buttons.clear()
+    init_buttons()
+    if val:
+        bot_move()
+
+
+def ask_who_is_first():
+    you_first = Button(master, image=X, width=75, height=75, command=partial(who_is_first, False))
+    bot_first = Button(master, image=O, width=75, height=75, command=partial(who_is_first, True))
+    you_first.grid(row=1, column=1)
+    bot_first.grid(row=1, column=2)
+    who_is_first_buttons.append(you_first)
+    who_is_first_buttons.append(bot_first)
 
 
 def init_buttons():
@@ -33,21 +52,23 @@ def load_bot():
 
 def bot_move():
     idx = get_best_legal_move(nn, game)
+    sign = game.next
     game.move(idx)
-    update_ui(idx)
+    update_ui(idx, sign)
 
 
 def player_move(i, j):
     idx = i * 3 + j
+    sign = game.next
     game.move(idx)
-    update_ui(idx)
+    update_ui(idx, sign)
     if not game.is_done():
         bot_move()
 
 
-def update_ui(idx):
+def update_ui(idx, sign):
     global replay_btn
-    if game.next == TicTacToe.X:
+    if sign == TicTacToe.X:
         img = X
     else:
         img = O
@@ -61,14 +82,13 @@ def update_ui(idx):
 
 def reset():
     for b in buttons:
-        b.configure(image=Empty, state='normal')
+        b.grid_remove()
+    buttons.clear()
     game.clear()
-    if replay_btn is not None:
-        replay_btn.grid_remove()
-    bot_move()
+    replay_btn.grid_remove()
+    ask_who_is_first()
 
 
 load_bot()
-init_buttons()
-bot_move()
+ask_who_is_first()
 mainloop()

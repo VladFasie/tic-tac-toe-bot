@@ -7,21 +7,22 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 import operator
 
-thread_pool_size = 4
-number_of_individuals_in_generation = 20
-number_of_selected_individuals = 4
+thread_pool_size = 2
+number_of_individuals_in_generation = 12
+number_of_selected_individuals = 3
 number_of_simulations = 1000
-number_of_generations = 10
+number_of_generations = 4
 
 
 def main():
+    print('generation number\t|\tmedium win rate of selected\t|\tmedium win rate\t|\twin rates')
     start = time.time()
     executor = ThreadPoolExecutor(thread_pool_size)
     nns = {}
     for i in range(number_of_individuals_in_generation):
         nns[generate_nn()] = 0
 
-    for generation in range(number_of_generations):
+    for generation in range(1, number_of_generations + 1):
         futures = []
         for nn in nns:
             futures.append(executor.submit(simulate, nn, number_of_simulations))
@@ -29,15 +30,20 @@ def main():
         for nn, future in zip(nns, futures):
             score = future.result()
             nns[nn] = score
-            #nn.save(str(score) + '_' + str(time.time()))
 
         sorted_nns = sorted(nns.items(), key=operator.itemgetter(1), reverse=True)
-        wins = [x[1] for x in sorted_nns]
-        medium_win_rate = sum(wins) / len(wins) / number_of_simulations * 100
-        print(str(generation) + ') ', wins, str(medium_win_rate) + '%')
+        # save the best from current generation
+        sorted_nns[0][0].save('bot' + str(generation) + '.nn')
 
-        if generation == number_of_generations - 1:
-            sorted_nns[0][0].save('bot.nn')
+        win_rates = [x[1] / number_of_simulations for x in sorted_nns]
+        medium_win_rate = sum(win_rates) / number_of_individuals_in_generation * 100
+        medium_win_rate_for_selected = sum(win_rates[:number_of_selected_individuals]) / number_of_selected_individuals * 100
+        print(str(generation) + ')\t',
+              str(round(medium_win_rate_for_selected, 2)) + '%\t',
+              str(round(medium_win_rate, 2)) + '%\t',
+              win_rates)
+
+        if generation == number_of_generations:
             break
 
         selected = []
