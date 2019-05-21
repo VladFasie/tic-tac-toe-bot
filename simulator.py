@@ -1,25 +1,25 @@
-from game import TicTacToe
 from helpers import get_best_legal_move
+from bit_game import BitTicTacToe
 
 from random import randint
 
 
 def simulate(nn, iterations):
     score = 0
-    game = TicTacToe()
+    game = BitTicTacToe()
     half_iterations = int(iterations / 2)
     for _ in range(half_iterations):
         result = simulate_nn_first(nn, game)
-        if result == TicTacToe.X:
+        if result == BitTicTacToe.X:
             score += 1
-        elif game.winner == TicTacToe.O:
+        elif game.winner == BitTicTacToe.O:
             score -= 1
         game.clear()
     for _ in range(half_iterations):
         result = simulate_nn_second(nn, game)
-        if result == TicTacToe.O:
+        if result == BitTicTacToe.O:
             score += 1
-        elif game.winner == TicTacToe.X:
+        elif game.winner == BitTicTacToe.X:
             score -= 1
         game.clear()
     return score

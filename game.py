@@ -62,6 +62,21 @@ class TicTacToe:
         self.winner = TicTacToe.Empty
         self.round = 0
 
+    def to_nn_input(self):
+        xs = []
+        os = []
+        for item in self.board:
+            if item == TicTacToe.X:
+                xs.append(1)
+                os.append(0)
+            elif item == TicTacToe.O:
+                xs.append(0)
+                os.append(1)
+            else:
+                xs.append(0)
+                os.append(0)
+        return xs + os
+
     def __str__(self):
         result = ''
         for i in range(0, 9, 3):
