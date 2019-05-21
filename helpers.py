@@ -26,10 +26,15 @@ def get_best_legal_move(nn, game):
     return move
 
 
+def get_best_move(nn, game):
+    data = game.to_nn_input()
+    result = nn.feed_forward(data)
+    return max(enumerate(result), key=operator.itemgetter(1))[0]
+
+
 def generate_nn():
     return NeuralNetwork(18, [
         [16, 'sigmoid'],
-        [14, 'sigmoid'],
         [12, 'sigmoid'],
         [9, 'sigmoid']
     ])

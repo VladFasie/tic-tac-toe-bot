@@ -1,26 +1,21 @@
-from helpers import get_best_legal_move
+from helpers import get_best_legal_move, get_best_move
 from bit_game import BitTicTacToe
 
 from random import randint
 
+win_score = 1
+loss_score = -1
+wrong_move_penalty = -10
 
 def simulate(nn, iterations):
     score = 0
     game = BitTicTacToe()
     half_iterations = int(iterations / 2)
     for _ in range(half_iterations):
-        result = simulate_nn_first(nn, game)
-        if result == BitTicTacToe.X:
-            score += 1
-        elif game.winner == BitTicTacToe.O:
-            score -= 1
+        score += simulate_nn_first(nn, game)
         game.clear()
     for _ in range(half_iterations):
-        result = simulate_nn_second(nn, game)
-        if result == BitTicTacToe.O:
-            score += 1
-        elif game.winner == BitTicTacToe.X:
-            score -= 1
+        score += simulate_nn_second(nn, game)
         game.clear()
     return score
 
@@ -28,13 +23,17 @@ def simulate(nn, iterations):
 def simulate_nn_first(nn, game):
     # assumption game is not done
     while True:
-        move_nn(game, nn)
+        if not move_nn(game, nn):
+            return game.round + wrong_move_penalty
         if game.is_done():
             break
         move_random(game)
         if game.is_done():
             break
-    return game.winner
+    if game.winner == BitTicTacToe.X:
+        return win_score
+    elif game.winner == BitTicTacToe.O:
+        return loss_score
 
 
 def simulate_nn_second(nn, game):
@@ -43,10 +42,14 @@ def simulate_nn_second(nn, game):
         move_random(game)
         if game.is_done():
             break
-        move_nn(game, nn)
+        if not move_nn(game, nn):
+            return game.round + wrong_move_penalty
         if game.is_done():
             break
-    return game.winner
+    if game.winner == BitTicTacToe.X:
+        return loss_score
+    elif game.winner == BitTicTacToe.O:
+        return win_score
 
 
 def move_random(game):
@@ -57,5 +60,9 @@ def move_random(game):
 
 def move_nn(game, nn):
     # not checked if move is possible
-    move = get_best_legal_move(nn, game)
-    game.move(move)
+    #move = get_best_legal_move(nn, game)
+    move = get_best_move(nn, game)
+    if move in game.available_moves():
+        game.move(move)
+        return True
+    return False
