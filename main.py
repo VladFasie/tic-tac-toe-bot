@@ -7,15 +7,16 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 import operator
 
-thread_pool_size = 2
-number_of_individuals_in_generation = 12
-number_of_selected_individuals = 3
+thread_pool_size = 4
+number_of_individuals_in_generation = 36
+number_of_selected_individuals = 8
 number_of_simulations = 1000
-number_of_generations = 4
+number_of_generations = 12
 
 
 def main():
-    print('generation number\t|\tmedium win rate of selected\t|\tmedium win rate\t|\twin rates')
+    print('generation number\t|\tthe average percentage of the maximum score for selected\t|\t' +
+          'the average percentage of the maximum score\t|\tscores')
     start = time.time()
     executor = ThreadPoolExecutor(thread_pool_size)
     nns = {}
@@ -35,13 +36,16 @@ def main():
         # save the best from current generation
         sorted_nns[0][0].save('bot' + str(generation) + '.nn')
 
-        win_rates = [x[1] / number_of_simulations for x in sorted_nns]
-        medium_win_rate = sum(win_rates) / number_of_individuals_in_generation * 100
-        medium_win_rate_for_selected = sum(win_rates[:number_of_selected_individuals]) / number_of_selected_individuals * 100
+        max_score = number_of_simulations
+        scores = [x[1] for x in sorted_nns]
+        medium_score_percent = sum(scores) / max_score / number_of_individuals_in_generation * 100
+        medium_scores_percent_for_selected = sum(scores[:number_of_selected_individuals]) / max_score / \
+            number_of_selected_individuals * 100
+
         print(str(generation) + ')\t',
-              str(round(medium_win_rate_for_selected, 2)) + '%\t',
-              str(round(medium_win_rate, 2)) + '%\t',
-              win_rates)
+              str(round(medium_scores_percent_for_selected, 2)) + '%\t',
+              str(round(medium_score_percent, 2)) + '%\t',
+              scores)
 
         if generation == number_of_generations:
             break
@@ -54,8 +58,13 @@ def main():
 
         next_generation = []
         for _ in range(number_of_individuals_in_generation):
-            n1 = selected[randint(0, len(selected) - 1)]
-            n2 = selected[randint(0, len(selected) - 1)]
+            idx1 = randint(0, len(selected) - 1)
+            while True:
+                idx2 = randint(0, len(selected) - 1)
+                if idx1 != idx2:
+                    break
+            n1 = selected[idx1]
+            n2 = selected[idx2]
             child = crossover(n1, n2)
             next_generation.append(child)
 

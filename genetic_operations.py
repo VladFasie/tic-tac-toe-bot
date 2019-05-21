@@ -6,6 +6,7 @@ from random import randint
 mutation_rate = 4  # %
 mutation_range = 15  # %
 
+
 def crossover(n1: NeuralNetwork, n2: NeuralNetwork) -> NeuralNetwork:
     if n1.input_size != n2.input_size:
         raise Exception('not compatible networks')
@@ -47,6 +48,7 @@ def mutate(val):
         else:
             return val - deviation
     return val
+
 
 def test():
     a = NeuralNetwork(3, [[2, 'sigmoid'], [1, 'relu']])
